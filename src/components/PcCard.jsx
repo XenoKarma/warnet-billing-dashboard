@@ -1,20 +1,17 @@
-import { FaDesktop, FaPlay, FaStop, FaCircle } from 'react-icons/fa'
+import { FaDesktop, FaPlay, FaStop, FaCircle, FaPlusCircle } from 'react-icons/fa'
 import Timer from './Timer'
 
-export default function PcCard({ pc, onStart, onStop }) {
-  // Mengecek status dari PC saat ini — SESUAI DENGAN SERVER (offline, online, active, expired)
+export default function PcCard({ pc, onStart, onStop, onAddTime }) {
   const isActive = pc.status === 'active'
   const isAvailable = pc.status === 'online'
   const isOffline = pc.status === 'offline'
   const isExpired = pc.status === 'expired'
 
-  // Menentukan warna kartu (Card) berdasarkan statusnya
   let cardClass = 'bg-dark-800 border-dark-600'
   if (isActive) cardClass = 'bg-dark-800 border-cyan shadow-[0_0_15px_rgba(0,229,255,0.2)]'
   if (isAvailable) cardClass = 'bg-dark-800 border-green/40 hover:border-green/80'
   if (isExpired) cardClass = 'bg-dark-800 border-yellow/40'
 
-  // Menentukan indikator titik warna
   let statusDot = 'text-gray-500'
   if (isActive) statusDot = 'text-cyan animate-pulse'
   if (isAvailable) statusDot = 'text-green'
@@ -53,36 +50,44 @@ export default function PcCard({ pc, onStart, onStop }) {
       </div>
 
       {/* Bagian Bawah: Tombol Aksi */}
-      <div className="flex gap-3">
+      <div className="space-y-2">
         {isAvailable && (
           <button
             onClick={() => onStart(pc.pc_number)}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-dark-700 border border-green/30 text-green font-bold text-sm tracking-wider hover:bg-green hover:text-dark-900 transition-all cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-dark-700 border border-green/30 text-green font-bold text-sm tracking-wider hover:bg-green hover:text-dark-900 transition-all cursor-pointer"
           >
             <FaPlay size={12} /> INITIALIZE
           </button>
         )}
         
         {isActive && (
-          <button
-            onClick={() => onStop(pc.pc_number)}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-dark-700 border border-red/30 text-red font-bold text-sm tracking-wider hover:bg-red hover:text-dark-900 transition-all cursor-pointer"
-          >
-            <FaStop size={12} /> TERMINATE
-          </button>
+          <>
+            <button
+              onClick={() => onAddTime(pc.pc_number)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-dark-700 border border-yellow/30 text-yellow font-bold text-sm tracking-wider hover:bg-yellow hover:text-dark-900 transition-all cursor-pointer"
+            >
+              <FaPlusCircle size={12} /> ADD TIME
+            </button>
+            <button
+              onClick={() => onStop(pc.pc_number)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-dark-700 border border-red/30 text-red font-bold text-sm tracking-wider hover:bg-red hover:text-dark-900 transition-all cursor-pointer"
+            >
+              <FaStop size={12} /> TERMINATE
+            </button>
+          </>
         )}
 
         {isExpired && (
           <button
             onClick={() => onStop(pc.pc_number)}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-dark-700 border border-yellow/30 text-yellow font-bold text-sm tracking-wider hover:bg-yellow hover:text-dark-900 transition-all cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-dark-700 border border-yellow/30 text-yellow font-bold text-sm tracking-wider hover:bg-yellow hover:text-dark-900 transition-all cursor-pointer"
           >
             <FaStop size={12} /> TERMINATE
           </button>
         )}
 
         {isOffline && (
-          <button disabled className="flex-1 px-4 py-3 rounded-xl bg-dark-800 border border-dark-600 text-dark-600 font-bold text-sm tracking-widest cursor-not-allowed">
+          <button disabled className="w-full px-4 py-3 rounded-xl bg-dark-800 border border-dark-600 text-dark-600 font-bold text-sm tracking-widest cursor-not-allowed">
             OFFLINE
           </button>
         )}

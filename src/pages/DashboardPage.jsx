@@ -4,8 +4,8 @@ import { useSocket } from '../contexts/SocketContext'
 import PcCard from '../components/PcCard'
 import PcSimulator from '../components/PcSimulator'
 import AddPcModal from '../components/AddPcModal'
+import DurationModal from '../components/DurationModal'
 
-// Alamat server backend API kamu
 const API_URL = 'http://localhost:5000'
 
 export default function DashboardPage() {
@@ -13,6 +13,7 @@ export default function DashboardPage() {
   const [pcs, setPcs] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAddPc, setShowAddPc] = useState(false)
+  const [durationPc, setDurationPc] = useState(null) // null = hidden, { pcNumber, mode: 'start'|'add' }
 
   // Fungsi fetch data PC (dipanggil saat mount & setelah tambah PC)
   const fetchPcs = useCallback(() => {
@@ -60,20 +61,41 @@ export default function DashboardPage() {
     }
   }, [socket])
 
-  // 3. Fungsi untuk mengirim perintah START ke API
-  const handleStartSession = async (pcNumber) => {
+  // 3. Klik START → buka modal pilih durasi (mode start)
+  const handleStartSession = (pcNumber) => {
+    setDurationPc({ pcNumber, mode: 'start' })
+  }
+
+  // 4. Klik ADD TIME → buka modal tambah durasi (mode add)
+  const handleAddTime = (pcNumber) => {
+    setDurationPc({ pcNumber, mode: 'add' })
+  }
+
+  // 5. Setelah durasi dipilih di modal → kirim ke API sesuai mode
+  const handleDurationConfirm = async (pcNumber, durationMinutes) => {
+    const { mode } = durationPc
+    setDurationPc(null)
+
+    const endpoint = mode === 'add'
+      ? `${API_URL}/api/session/add-time`
+      : `${API_URL}/api/session/start`
+
+    const body = mode === 'add'
+      ? { pc_number: pcNumber, added_minutes: durationMinutes }
+      : { pc_number: pcNumber, duration_minutes: durationMinutes }
+
     try {
-      await fetch(`${API_URL}/api/session/start`, {
+      await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pc_number: pcNumber, duration_minutes: 60 }), // default main 60 menit
+        body: JSON.stringify(body),
       })
     } catch (err) {
-      console.error('Gagal memulai sesi:', err)
+      console.error('Gagal:', err)
     }
   }
 
-  // 4. Fungsi untuk mengirim perintah STOP ke API
+  // 6. Fungsi untuk mengirim perintah STOP ke API
   const handleStopSession = async (pcNumber) => {
     try {
       await fetch(`${API_URL}/api/session/stop`, {
@@ -143,6 +165,7 @@ export default function DashboardPage() {
             pc={pc}
             onStart={handleStartSession}
             onStop={handleStopSession}
+            onAddTime={handleAddTime}
           />
         ))}
       </div>
@@ -155,6 +178,16 @@ export default function DashboardPage() {
             fetchPcs()
             setShowAddPc(false)
           }}
+        />
+      )}
+
+      {/* Modal Pilih Durasi Billing */}
+      {durationPc !== null && (
+        <DurationModal
+          pcNumber={durationPc.pcNumber}
+          mode={durationPc.mode}
+          onClose={() => setDurationPc(null)}
+          onConfirm={handleDurationConfirm}
         />
       )}
 
