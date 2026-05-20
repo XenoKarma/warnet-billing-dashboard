@@ -1,14 +1,42 @@
 import { useState } from 'react'
-import { FaUser, FaLock, FaWifi } from 'react-icons/fa'
+import { FaUser, FaLock, FaWifi, FaExclamationCircle, FaSpinner } from 'react-icons/fa'
+
+const API_URL = 'http://localhost:5000'
 
 export default function LoginPage({ onLogin }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
-    e.preventDefault() // Mencegah halaman refresh
-    if (username && password) {
-      onLogin(username) // Kirim username ke App.jsx untuk login
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+
+    if (!username || !password) {
+      setError('Username dan password harus diisi')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Login gagal')
+        return
+      }
+
+      onLogin(data.username, data.token)
+    } catch (err) {
+      setError('Tidak dapat terhubung ke server')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -34,6 +62,13 @@ export default function LoginPage({ onLogin }) {
             <h2 className="text-2xl font-semibold text-white tracking-wide">Operator Login</h2>
           </div>
 
+          {error && (
+            <div className="flex items-center gap-2 px-4 py-3 mb-4 rounded-xl bg-red/10 border border-red/30 text-red text-sm font-semibold">
+              <FaExclamationCircle />
+              {error}
+            </div>
+          )}
+
           <div className="space-y-4">
             {/* Input Username */}
             <div className="relative flex items-center">
@@ -42,7 +77,7 @@ export default function LoginPage({ onLogin }) {
                 type="text"
                 required
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => { setUsername(e.target.value); setError('') }}
                 className="w-full py-4 pl-12 pr-4 bg-dark-900/80 border border-dark-600 rounded-xl text-white outline-none focus:border-cyan transition-colors"
                 placeholder="USERNAME"
               />
@@ -55,15 +90,20 @@ export default function LoginPage({ onLogin }) {
                 type="password"
                 required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => { setPassword(e.target.value); setError('') }}
                 className="w-full py-4 pl-12 pr-4 bg-dark-900/80 border border-dark-600 rounded-xl text-white outline-none focus:border-pink transition-colors"
                 placeholder="PASSWORD"
               />
             </div>
 
             {/* Tombol Login */}
-            <button type="submit" className="w-full mt-6 py-4 rounded-xl bg-dark-800 border border-cyan text-cyan font-bold tracking-[0.2em] hover:bg-cyan hover:text-dark-900 transition-colors cursor-pointer glow-cyan">
-              INITIALIZE
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full mt-6 py-4 rounded-xl bg-dark-800 border border-cyan text-cyan font-bold tracking-[0.2em] hover:bg-cyan hover:text-dark-900 transition-colors cursor-pointer glow-cyan disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {loading ? <FaSpinner className="animate-spin" /> : null}
+              {loading ? 'CONNECTING...' : 'INITIALIZE'}
             </button>
           </div>
         </form>

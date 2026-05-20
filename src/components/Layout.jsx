@@ -1,8 +1,12 @@
-import { FaWifi, FaUserCircle, FaSignOutAlt, FaCircle } from 'react-icons/fa'
+import { useState } from 'react'
+import { FaWifi, FaUserCircle, FaSignOutAlt, FaCircle, FaCog } from 'react-icons/fa'
 import { useSocket } from '../contexts/SocketContext'
+import AccountModal from './AccountModal'
 
-export default function Layout({ children, operator, onLogout }) {
+export default function Layout({ children, operator, onLogout, onUpdateAccount, token }) {
   const { connected } = useSocket()
+  const [showAccount, setShowAccount] = useState(false)
+
   return (
     <div className="min-h-screen bg-dark-900 relative">
       {/* Background Kotak-kotak Hologram */}
@@ -34,8 +38,8 @@ export default function Layout({ children, operator, onLogout }) {
               {connected ? 'SERVER LIVE' : 'DISCONNECTED'}
             </div>
 
-            {/* Bagian Kanan (Info Operator & Logout) */}
-            <div className="flex items-center gap-6">
+            {/* Bagian Kanan (Info Operator, Settings & Logout) */}
+            <div className="flex items-center gap-3">
               <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-dark-800 border border-dark-600 shadow-inner">
                 <FaUserCircle className="text-purple text-lg" />
                 <div className="flex flex-col">
@@ -43,6 +47,14 @@ export default function Layout({ children, operator, onLogout }) {
                   <span className="text-sm font-semibold text-gray-200 leading-none">{operator}</span>
                 </div>
               </div>
+
+              <button
+                onClick={() => setShowAccount(true)}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-gray-400 hover:text-purple border border-transparent hover:border-purple/40 hover:bg-purple/10 transition-all duration-300 cursor-pointer"
+                title="Account Settings"
+              >
+                <FaCog size={16} />
+              </button>
 
               <button
                 onClick={onLogout}
@@ -60,6 +72,16 @@ export default function Layout({ children, operator, onLogout }) {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {children}
       </main>
+
+      {/* Modal Account Settings */}
+      {showAccount && (
+        <AccountModal
+          currentOperator={operator}
+          token={token}
+          onClose={() => setShowAccount(false)}
+          onUpdate={onUpdateAccount}
+        />
+      )}
     </div>
   )
 }
