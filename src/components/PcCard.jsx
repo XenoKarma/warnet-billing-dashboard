@@ -2,21 +2,24 @@ import { FaDesktop, FaPlay, FaStop, FaCircle } from 'react-icons/fa'
 import Timer from './Timer'
 
 export default function PcCard({ pc, onStart, onStop }) {
-  // Mengecek status dari PC saat ini
+  // Mengecek status dari PC saat ini — SESUAI DENGAN SERVER (offline, online, active, expired)
   const isActive = pc.status === 'active'
-  const isAvailable = pc.status === 'online' || pc.status === 'available'
+  const isAvailable = pc.status === 'online'
   const isOffline = pc.status === 'offline'
+  const isExpired = pc.status === 'expired'
 
   // Menentukan warna kartu (Card) berdasarkan statusnya
   let cardClass = 'bg-dark-800 border-dark-600'
   if (isActive) cardClass = 'bg-dark-800 border-cyan shadow-[0_0_15px_rgba(0,229,255,0.2)]'
   if (isAvailable) cardClass = 'bg-dark-800 border-green/40 hover:border-green/80'
+  if (isExpired) cardClass = 'bg-dark-800 border-yellow/40'
 
   // Menentukan indikator titik warna
   let statusDot = 'text-gray-500'
   if (isActive) statusDot = 'text-cyan animate-pulse'
   if (isAvailable) statusDot = 'text-green'
   if (isOffline) statusDot = 'text-red'
+  if (isExpired) statusDot = 'text-yellow'
 
   return (
     <div className={`relative rounded-xl border p-5 transition-all duration-300 overflow-hidden glass-panel ${cardClass}`}>
@@ -64,6 +67,15 @@ export default function PcCard({ pc, onStart, onStop }) {
           <button
             onClick={() => onStop(pc.pc_number)}
             className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-dark-700 border border-red/30 text-red font-bold text-sm tracking-wider hover:bg-red hover:text-dark-900 transition-all cursor-pointer"
+          >
+            <FaStop size={12} /> TERMINATE
+          </button>
+        )}
+
+        {isExpired && (
+          <button
+            onClick={() => onStop(pc.pc_number)}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-dark-700 border border-yellow/30 text-yellow font-bold text-sm tracking-wider hover:bg-yellow hover:text-dark-900 transition-all cursor-pointer"
           >
             <FaStop size={12} /> TERMINATE
           </button>

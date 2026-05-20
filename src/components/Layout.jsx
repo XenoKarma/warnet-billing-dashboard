@@ -1,6 +1,8 @@
-import { FaWifi, FaUserCircle, FaSignOutAlt } from 'react-icons/fa'
+import { FaWifi, FaUserCircle, FaSignOutAlt, FaCircle } from 'react-icons/fa'
+import { useSocket } from '../contexts/SocketContext'
 
 export default function Layout({ children, operator, onLogout }) {
+  const { connected } = useSocket()
   return (
     <div className="min-h-screen bg-dark-900 relative">
       {/* Background Kotak-kotak Hologram */}
@@ -24,6 +26,12 @@ export default function Layout({ children, operator, onLogout }) {
                 <h1 className="text-white font-bold text-2xl tracking-[0.15em] drop-shadow-[0_0_5px_rgba(0,229,255,0.5)]">WARNET</h1>
                 <p className="text-xs text-cyan-dim tracking-[0.4em] uppercase font-semibold -mt-1">Command Center</p>
               </div>
+            </div>
+
+            {/* Indikator Koneksi Server */}
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold tracking-wider ${connected ? 'border-green/30 text-green bg-green/5' : 'border-red/30 text-red bg-red/5'}`}>
+              <FaCircle className={`text-[6px] ${connected ? 'text-green' : 'text-red'}`} />
+              {connected ? 'SERVER LIVE' : 'DISCONNECTED'}
             </div>
 
             {/* Bagian Kanan (Info Operator & Logout) */}
