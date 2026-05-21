@@ -1,7 +1,7 @@
-import { FaDesktop, FaPlay, FaStop, FaCircle, FaPlusCircle } from 'react-icons/fa'
+import { FaDesktop, FaPlay, FaStop, FaCircle, FaPlusCircle, FaTrash } from 'react-icons/fa'
 import Timer from './Timer'
 
-export default function PcCard({ pc, onStart, onStop, onAddTime }) {
+export default function PcCard({ pc, onStart, onStop, onAddTime, onDelete }) {
   const isActive = pc.status === 'active'
   const isAvailable = pc.status === 'online'
   const isOffline = pc.status === 'offline'
@@ -19,7 +19,7 @@ export default function PcCard({ pc, onStart, onStop, onAddTime }) {
   if (isExpired) statusDot = 'text-yellow'
 
   return (
-    <div className={`relative rounded-xl border p-5 transition-all duration-300 overflow-hidden glass-panel ${cardClass}`}>
+    <div className={`relative rounded-xl border p-5 transition-all duration-300 overflow-hidden glass-panel group ${cardClass}`}>
       
       {/* Efek Garis Berjalan (Hanya saat Aktif) */}
       {isActive && (
@@ -37,7 +37,18 @@ export default function PcCard({ pc, onStart, onStop, onAddTime }) {
             <p className="text-[10px] text-gray-500 font-mono">STATUS: {pc.status.toUpperCase()}</p>
           </div>
         </div>
-        <FaCircle className={`text-xs ${statusDot}`} />
+        <div className="flex items-center gap-2">
+          {!isActive && onDelete && (
+            <button
+              onClick={() => onDelete(pc.pc_number)}
+              className="text-gray-600 hover:text-red opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
+              title={`Hapus ${pc.pc_number}`}
+            >
+              <FaTrash size={12} />
+            </button>
+          )}
+          <FaCircle className={`text-xs ${statusDot}`} />
+        </div>
       </div>
 
       {/* Bagian Tengah: Tampilan Waktu (Timer) */}

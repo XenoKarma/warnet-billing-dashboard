@@ -5,6 +5,7 @@ import PcCard from '../components/PcCard'
 import PcSimulator from '../components/PcSimulator'
 import AddPcModal from '../components/AddPcModal'
 import DurationModal from '../components/DurationModal'
+import ConfirmModal from '../components/ConfirmModal'
 
 const API_URL = 'http://localhost:5000'
 
@@ -14,6 +15,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [showAddPc, setShowAddPc] = useState(false)
   const [durationPc, setDurationPc] = useState(null) // null = hidden, { pcNumber, mode: 'start'|'add' }
+  const [deletePc, setDeletePc] = useState(null) // null = hidden, string = pcNumber to delete
 
   // Fungsi fetch data PC (dipanggil saat mount & setelah tambah PC)
   const fetchPcs = useCallback(() => {
@@ -95,6 +97,29 @@ export default function DashboardPage() {
     }
   }
 
+  // 7. Klik HAPUS → buka konfirmasi
+  const handleDeleteClick = (pcNumber) => {
+    setDeletePc(pcNumber)
+  }
+
+  // 8. Konfirmasi hapus → panggil API
+  const handleDeleteConfirm = async () => {
+    if (!deletePc) return
+    const pcNumber = deletePc
+    setDeletePc(null)
+    try {
+      const res = await fetch(`${API_URL}/api/pcs/${pcNumber}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (!res.ok) {
+        alert(data.error || 'Gagal menghapus PC')
+        return
+      }
+      fetchPcs()
+    } catch (err) {
+      console.error('Gagal menghapus PC:', err)
+    }
+  }
+
   // 6. Fungsi untuk mengirim perintah STOP ke API
   const handleStopSession = async (pcNumber) => {
     try {
@@ -166,6 +191,7 @@ export default function DashboardPage() {
             onStart={handleStartSession}
             onStop={handleStopSession}
             onAddTime={handleAddTime}
+            onDelete={handleDeleteClick}
           />
         ))}
       </div>
@@ -188,6 +214,17 @@ export default function DashboardPage() {
           mode={durationPc.mode}
           onClose={() => setDurationPc(null)}
           onConfirm={handleDurationConfirm}
+        />
+      )}
+
+      {/* Modal Konfirmasi Hapus PC */}
+      {deletePc !== null && (
+        <ConfirmModal
+          title={`Hapus ${deletePc}`}
+          message={`Apakah kamu yakin ingin menghapus ${deletePc}? Data sesi billing PC ini juga akan ikut terhapus. Tindakan ini tidak bisa dibatalkan.`}
+          confirmText="HAPUS PC"
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setDeletePc(null)}
         />
       )}
 
